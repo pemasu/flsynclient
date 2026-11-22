@@ -63,6 +63,7 @@ int  parseline(char *line, char **argv, int maxarg)
 	int argc=0;
 	while (*line!=0 && argc<maxarg) {      
 		while (*line==' ' || *line=='\t' || *line =='\n') *line++=0;     
+		if (*line==0) break;
 		*argv++ = line;
 		argc++;
 		while (*line!=0 && *line!=' ' && *line!='\t' && *line!='\n') line++;             
@@ -78,7 +79,7 @@ void synclient(char* field, double value)
 	if (verbose){
 		snprintf(tmp,1024,"synclient %s=%f",field,value);
 		printf(_("Executing: %s\n"),tmp);
-	}else snprintf(tmp,1024,"synclient %s=%f &> /dev/null",field,value);
+	}else snprintf(tmp,1024,"synclient %s=%f >/dev/null 2>&1",field,value);
 
 	system(tmp);
 }
@@ -89,7 +90,7 @@ void parsesynclientoutput(FILE* fp,bool onlyset)
 	char* argv[3];
 	
 	// first line must be "Parameters settings"
-	fgets(line,1024,fp);
+	if (fgets(line,1024,fp)==NULL) return;
 	if (strstr(line,"settings")==NULL){
 		fprintf(stderr,"%s",line);
 		fl_alert("%s",line);
@@ -177,8 +178,6 @@ void parsesynclientoutput(FILE* fp,bool onlyset)
 				VertTwoScrolling->value(atoi(argv[2]));
 			}else if (!strcmp(argv[0],"HorizTwoFingerScroll")){
 				HorizTwoScrolling->value(atoi(argv[2]));
-			}else if (!strcmp(argv[0],"EmulateMidButtonTime")){
-				EmulateMidButtonTime->value(atoi(argv[2]));
 			}else if (!strcmp(argv[0],"FastTaps")){
 				FastTaps->value(atoi(argv[2]));
 			}else if (!strcmp(argv[0],"LockedDrags")){
@@ -251,9 +250,9 @@ void CalibrateEdge(int edge)
 	int ymin=100000;
 	fgets(tmp,1024,fp);
 	for (int i=0; i<10 ; i++){
-		fgets(tmp,1024,fp);
+		if (fgets(tmp,1024,fp)==NULL) break;
 		if (verbose) printf("%s\n",tmp);
-		parseline(tmp,argv,3);
+		if (parseline(tmp,argv,3)<3) continue;
 		if (atoi(argv[1])>xmax) xmax=atoi(argv[1]);
 		if (atoi(argv[1])<xmin) xmin=atoi(argv[1]);
 		if (atoi(argv[2])>ymax) ymax=atoi(argv[2]);

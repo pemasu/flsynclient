@@ -22,6 +22,8 @@ struct Init
 Init()
 {
 setlocale(LC_ALL, "");
+// keep decimal point for synclient parameter parsing, translations still work
+setlocale(LC_NUMERIC, "C");
 bindtextdomain("flsynclient", "/usr/share/locale");
 bind_textdomain_codeset("flsynclient", "UTF-8");
 textdomain("flsynclient");
@@ -100,11 +102,19 @@ Fl_Value_Slider *MinSpeed=(Fl_Value_Slider *)0;
 
 static void cb_MinSpeed(Fl_Value_Slider* o, void*) {
   synclient("MinSpeed",o->value());
+  if (o->value() > MaxSpeed->value()) {
+    MaxSpeed->value(o->value());
+    synclient("MaxSpeed",o->value());
+  }
 }
 
 Fl_Value_Slider *MaxSpeed=(Fl_Value_Slider *)0;
 
 static void cb_MaxSpeed(Fl_Value_Slider* o, void*) {
+  if (o->value() < MinSpeed->value()) {
+    MinSpeed->value(o->value());
+    synclient("MinSpeed",o->value());
+  }
   synclient("MaxSpeed",o->value());
 }
 
@@ -610,6 +620,7 @@ ddle mouse button event"));
           o->when(FL_WHEN_RELEASE);
           o->precision(4);
           o->range(0.0001,0.01);
+          o->step(0.0001);
         }
         o->end();
       }
@@ -675,7 +686,7 @@ ddle mouse button event"));
           o->menu(menu_RTCornerButton);
         }
         { Fl_Choice* o = LBCornerButton = new Fl_Choice(330, 189, 110, 20, _("Bottom Left Corner"));
-          o->tooltip(_("Which mouse button is reported on a right top corner tap"));
+          o->tooltip(_("Which mouse button is reported on a left bottom corner tap"));
           o->box(FL_NO_BOX);
           o->down_box(FL_BORDER_BOX);
           o->color(FL_LIGHT1);
@@ -686,7 +697,7 @@ ddle mouse button event"));
           o->menu(menu_LBCornerButton);
         }
         { Fl_Choice* o = RBCornerButton = new Fl_Choice(330, 219, 110, 20, _("Bottom Right Corner"));
-          o->tooltip(_("Which mouse button is reported on a right top corner tap"));
+          o->tooltip(_("Which mouse button is reported on a right bottom corner tap"));
           o->box(FL_NO_BOX);
           o->down_box(FL_BORDER_BOX);
           o->color(FL_LIGHT1);
@@ -1004,7 +1015,7 @@ aused by double tapping slower"));
       o->callback((Fl_Callback*)cb_Save);
     }
     { Fl_Button* o = new Fl_Button(380, 364, 80, 25, _("Quit"));
-      o->tooltip(_("Save configuration to ~/.flSynclient"));
+      o->tooltip(_("Exit flSynclient"));
       o->box(FL_THIN_UP_BOX);
       o->color(FL_LIGHT1);
       o->selection_color(FL_LIGHT1);

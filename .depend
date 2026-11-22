@@ -1,0 +1,2 @@
+UImain.o: UImain.c UImain.h
+main.o: main.c UImain.h
