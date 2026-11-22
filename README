@@ -1,0 +1,68 @@
+flSynclient: fltk frontend to the command line tool synclient
+
+Needs:
+ - a touchpad supported by the synaptics driver, 
+ - the driver itself installed,
+ - synclient (command line tool for synaptics driver), 
+ - SHMConfig "on"
+
+Your XF86Config/xorg.conf should contains something like:
+------------------------------------------------------------------
+Section "InputDevice"
+        Identifier      "touchpad"
+        Driver          "synaptics"
+        Option          "Device"                "/dev/psaux"
+        Option          "Protocol"              "auto-dev"
+        Option          "SHMConfig"             "on"
+EndSection
+...
+Section "ServerLayout"
+	...
+        InputDevice     "touchpad" "AlwaysCore"
+EndSection
+------------------------------------------------------------------
+
+flSynclient saves his setting in ~/.flSynclient
+
+Saved settings can be restored every startup using the command:
+    flSynclient -s 
+
+Tested settings can be definitely saved in XF86Config/xorg.conf
+adding a option line for every option in ~/.flSynaptics:
+
+------------------------------------------------------------------
+Section "InputDevice" 
+        Identifier      "touchpad"
+	.
+	.
+	Option "Optionname" "OptionValue"
+	Option "Optionname" "Optionvalue"
+	.
+	.
+	.
+EndSection
+ ------------------------------------------------------------------
+   
+INSTALL:
+ - make
+ - make install
+ 
+NOTE:
+ - after the "make" you can test the program immediatly with:
+   ./flSynclient
+ - the make install copies the binary in /usr/local/bin
+   and the pixmaps un /usr/share/pixmaps , for different
+   location you can copy the three files manually
+   
+TODO
+ - man page
+ - set char dimension and colors on start
+ - internationalization (GNU gettext or POSIX catget)
+ 
+CHANGELOG:
+v0.6 - added error interception if SHMconfig not enebled - improved verbose mode - improved makefile
+v0.5 - auto calibration, make install, resolved a zombi-maker bug, completed tooltips
+v0.4 - reads actual settings on start, GUI improvement
+v0.3 - added verbose mode, set mode
+v0.2 - added busy cursor, tooltips, resolved a button setting bug
+v0.1 - first version 
